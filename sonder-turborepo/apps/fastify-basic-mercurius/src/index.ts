@@ -2,14 +2,14 @@
 
 import Fastify  from 'fastify';
 import mercurius from 'mercurius';
+import {makeExecutableSchema,} from 'graphql-tools'
+import {loadFiles} from '@graphql-tools/load-files'
 
 const app = Fastify();
 
-const schema = `
-  type Query {
-    add(x: Int, y: Int): Int
-  }
-`;
+const schema = makeExecutableSchema({
+  typeDefs: loadFiles('./src/schema/**/*.graphql'),
+})
 
 const resolvers = {
   Query: {
@@ -27,4 +27,13 @@ app.get('/', async function (_req, reply) {
   return reply.graphql(query);
 });
 
-app.listen(3000);
+
+const start = async () => {
+  try {
+    await app.listen({ port: 3000 })
+  } catch (err) {
+    app.log.error(err)
+    process.exit(1)
+  }
+}
+start()
